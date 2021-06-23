@@ -2,3 +2,4 @@
 *.mkv
 *.pyc
 .idea
+__pycache__
