@@ -183,11 +183,11 @@ def assign_values(values):
 
 
 def get_values():
-    final_dict = {}
-    img_gen = frame_generator()
+    img_gen = frame_generator('../video.mkv')
     frame = 0
     total_time = 0
     while True:
+        final_dict = {}
         frame += 1
         if frame >= 50:
             break
@@ -227,10 +227,11 @@ def get_values():
                 final_dict.update(assign_values([{'color': "white", "array": white_numbers}]))
         time_taken = round(time.time() - start_time, 4)
         total_time += time_taken
-        # print(time_taken, "-->", final_dict)
-        print("Frame: ", frame, "--> {} sec".format(time_taken))
+        print(frame, '--->', final_dict)
+        # show_image(screen, 'Original')
 
-    print("Total Time: ", total_time)
+        # print("Frame: ", frame, "--> {} sec".format(time_taken), final_dict)
+    # print("Total Time: ", total_time)
         # time.sleep(0.0001)
 
 
@@ -324,5 +325,5 @@ def test_generator():
 
 if __name__ == "__main__":
     # test_generator()
-    # get_values()
-    get_values_in_memory()
+    get_values()
+    # get_values_in_memory()

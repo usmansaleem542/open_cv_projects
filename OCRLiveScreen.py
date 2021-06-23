@@ -68,7 +68,7 @@ class OCRLiveScreen:
         return re.findall("\d+\.\d+", text)
 
     def _GetWhiteMaskedValues(self, image_data):
-        mask = cv2.inRange(self.HSV, *self._RedMask)
+        mask = cv2.inRange(self.HSV, *self._WhiteMask)
         imask = mask > 0
         white = np.zeros_like(image_data, np.uint8)
         white[imask] = image_data[imask]
