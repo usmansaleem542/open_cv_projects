@@ -5,6 +5,7 @@ import json
 import numpy as np
 import pytesseract
 import threading
+from PIL import ImageGrab
 
 from helper import frame_generator, show_image
 
@@ -23,13 +24,13 @@ class OCRLiveScreen:
         self.GreenImage = None
         self.WhiteImage = None
         self.HSV = None
-        self.FrameGenerator = frame_generator('video.mkv')
         self.Counter = 0
         self._GreenMask = (54, 90, 71), (100, 255, 255)
         self._RedMask = (130, 130, 130), (179, 255, 255)
         self._WhiteMask = (0, 0, 204), (173, 255, 255)
         self.Masks = {"green": self._GreenMask, "red": self._RedMask, "white": self._WhiteMask}
         self.FinalDict = {}
+        # self.FrameGenerator = frame_generator('video.mkv')
 
     def _Reset(self):
         self.RedImage = None
@@ -38,32 +39,36 @@ class OCRLiveScreen:
         self.HSV = None
 
     def _GetCurrentFrame(self):
-        screen = next(self.FrameGenerator)
+        screen = ImageGrab.grab()
+        screen = np.array(screen)
+        screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
+        # screen = next(self.FrameGenerator)
         return screen
 
     def Start(self):
-        total_time = 0
+        # total_time = 0
         while True:
             # if self.Counter > 75:
             #     break
-            self.Counter += 1
+            # self.Counter += 1
             screen = self._GetCurrentFrame()
             # if self.Counter < 25:
             #     continue
-            start_time = time.time()
+            # start_time = time.time()
             results = self._SplitImage(screen)
-            final_dict = self._GetFinalDict(results['green'], results['red'], results['white'])
+            self._GetFinalDict(results['green'], results['red'], results['white'])
             # if len(final_dict) == 0:
             #     cv2.imwrite(f'{self.Counter}.png', screen)
             #     save_json(f'{self.Counter}.json', results)
 
-            diff = round(time.time() - start_time, 4)
-            total_time += diff
-            print(self.Counter, '--->', final_dict)
+            # diff = round(time.time() - start_time, 4)
+            # total_time += diff
+            print(self.FinalDict)
+            # print(self.Counter, '--->', diff,  self.FinalDict)
             # show_image(screen, 'Optimized')
             # print(f"-> Count: {self.Counter} Took Time: {diff} sec {final_dict}\n")
 
-        print("\nTotal Time: ", total_time)
+        # print("\nTotal Time: ", total_time)
 
     def _GetMaskedValues(self, image_data, mask_key, results):
         mask_params = self.Masks[mask_key]
@@ -114,24 +119,21 @@ class OCRLiveScreen:
         return final_dict
 
     def _GetFinalDict(self, green_numbers, red_numbers, white_numbers):
-        final_dict = {}
         if len(red_numbers) == 8 and len(green_numbers) == 8 and len(white_numbers) == 8:
 
             values = [{'color': "red", "array": red_numbers}, {'color': "green", "array": green_numbers},
                       {'color': "white", "array": white_numbers}]
-            final_dict = self._AssignValues(values)
+            self.FinalDict = self._AssignValues(values)
 
         elif len(red_numbers) == 8 or len(green_numbers) == 8 or len(white_numbers) == 8:
             if len(red_numbers) == 8:
-                final_dict.update(self._AssignValues([{'color': "red", "array": red_numbers}]))
+                self.FinalDict.update(self._AssignValues([{'color': "red", "array": red_numbers}]))
 
             if len(green_numbers) == 8:
-                final_dict.update(self._AssignValues([{'color': "green", "array": green_numbers}]))
+                self.FinalDict.update(self._AssignValues([{'color': "green", "array": green_numbers}]))
 
             if len(white_numbers) == 8:
-                final_dict.update(self._AssignValues([{'color': "white", "array": white_numbers}]))
-
-        return final_dict
+                self.FinalDict.update(self._AssignValues([{'color': "white", "array": white_numbers}]))
 
     def _SplitImage(self, image_data):
         # convert to hsv

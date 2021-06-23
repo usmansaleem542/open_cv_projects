@@ -6,7 +6,7 @@ import time
 import numpy as np
 import cv2
 import re
-from helper import frame_generator, show_image
+from live_screen_ocr.helper import frame_generator, show_image
 
 pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 
@@ -183,20 +183,21 @@ def assign_values(values):
 
 
 def get_values():
-    img_gen = frame_generator('../video.mkv')
+    # img_gen = frame_generator('../video.mkv')
     frame = 0
     total_time = 0
+    final_dict = {}
+
     while True:
-        final_dict = {}
         frame += 1
         if frame >= 50:
             break
         # get screen shot
-        # screen = ImageGrab.grab()
-        # screen.save('grabbed.png')
+        screen = ImageGrab.grab()
+        screen.save('grabbed.png')
         start_time = time.time()
-        screen = next(img_gen)
-        cv2.imwrite("grabbed.png", screen)
+        # screen = next(img_gen)
+        # cv2.imwrite("grabbed.png", screen)
 
         #split screen shot by color
         split_img()
@@ -227,7 +228,7 @@ def get_values():
                 final_dict.update(assign_values([{'color': "white", "array": white_numbers}]))
         time_taken = round(time.time() - start_time, 4)
         total_time += time_taken
-        print(frame, '--->', final_dict)
+        print(frame, '--->', time_taken,  final_dict)
         # show_image(screen, 'Original')
 
         # print("Frame: ", frame, "--> {} sec".format(time_taken), final_dict)
